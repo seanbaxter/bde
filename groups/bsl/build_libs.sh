@@ -10,5 +10,7 @@ cd bslmf;  sh build_libs.sh; cd ..;
 cd bslmt;  sh build_libs.sh; cd ..;
 cd bsls;   sh build_libs.sh; cd ..;
 cd bslscm; sh build_libs.sh; cd ..;
-
 cd bslstl; sh build_libs.sh; cd ..;
+cd bslstp; sh build_libs.sh; cd ..;
+cd bsltf;  sh build_libs.sh; cd ..;
+cd bslx;   sh build_libs.sh; cd ..;
