@@ -293,7 +293,7 @@ extern "C" {
 #endif
 
 #if !(defined(BSLS_PLATFORM_OS_SOLARIS)) && !(defined(BSLS_PLATFORM_OS_AIX))
-#include <immintrin.h>
+// #include <immintrin.h>
 #include <emmintrin.h>
 #endif
 
