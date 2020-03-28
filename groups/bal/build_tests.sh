@@ -1,2 +1,10 @@
 cd balb;   sh build_tests.sh; cd ..;
 cd balber; sh build_tests.sh; cd ..;
+cd balbc;  sh build_tests.sh; cd ..;
+cd baljsn; sh build_tests.sh; cd ..;
+cd ball;   sh build_tests.sh; cd ..;
+cd balm;   sh build_tests.sh; cd ..;
+cd balscm; sh build_tests.sh; cd ..;
+cd balst;  sh build_tests.sh; cd ..;
+cd baltzo; sh build_tests.sh; cd ..;
+cd balmxl; sh build_tests.sh; cd ..;
