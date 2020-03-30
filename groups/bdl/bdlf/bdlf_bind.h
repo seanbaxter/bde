@@ -4628,6 +4628,8 @@ struct Bind_OneResultTypeOrAnother {
     typedef typename Result<FUNC>::type type;
 };
 
+// typedef typename Bind_OneResultTypeOrAnother<int(*)(int)>::type blah;
+
 template <class FUNC>
 struct Bind_FuncTraitsImp<bslmf::Nil,FUNC,0,0,0> {
     // Function traits for function objects that are passed by value without

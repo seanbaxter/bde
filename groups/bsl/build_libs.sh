@@ -1,4 +1,4 @@
-
+set -x
 cd bsla;   sh build_libs.sh; cd ..;
 cd bslalg; sh build_libs.sh; cd ..;
 cd bsldoc; sh build_libs.sh; cd ..;

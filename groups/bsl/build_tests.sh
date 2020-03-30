@@ -1,4 +1,4 @@
-set -v
+set -x
 cd bsla;    sh build_tests.sh; cd ..;
 cd bslalg;  sh build_tests.sh; cd ..;
 cd bsldoc;  sh build_tests.sh; cd ..;
