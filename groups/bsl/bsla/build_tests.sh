@@ -1,6 +1,6 @@
 set -x
 
-FLAGS="-filetype=o -O0 -stat"
+FLAGS="-filetype=o -O0 -fPIC -stat"
 PATHS="-I . -I ../bsls"
 
 circle $FLAGS $PATHS bsla_annotations.t.cpp

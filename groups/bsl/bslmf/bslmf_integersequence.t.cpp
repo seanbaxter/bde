@@ -420,7 +420,7 @@ int main(int argc, char *argv[])
             ASSERTV(L_,  1 == getValue<3>(Obj5()));
             ASSERTV(L_,  2 == getValue<4>(Obj5()));
 
-            const Type k_MAX = std::numeric_limits<Type>::max();
+            constexpr Type k_MAX = std::numeric_limits<Type>::max();
             using Obj6 = IntegerSequence<Type, k_MAX, 11, 0, 0, -11, -k_MAX>;
             ASSERTV(L_, (bsl::is_same<Type, Obj6::value_type>::value));
             ASSERTV(L_,      6 == Obj6::size());

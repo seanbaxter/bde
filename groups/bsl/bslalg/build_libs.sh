@@ -1,6 +1,6 @@
 set -x
 PATHS="-I . -I ../bsls -I ../bslscm -I ../bslma -I ../bslmf -I ../bsla"
-FLAGS="-O0 -filetype=o -stat"
+FLAGS="-O0 -filetype=o -fPIC -stat"
 
 circle $PATHS $FLAGS bslalg_arraydestructionprimitives.cpp
 circle $PATHS $FLAGS bslalg_arrayprimitives.cpp
@@ -41,3 +41,44 @@ circle $PATHS $FLAGS bslalg_typetraitnil.cpp
 circle $PATHS $FLAGS bslalg_typetraitpair.cpp
 circle $PATHS $FLAGS bslalg_typetraits.cpp
 circle $PATHS $FLAGS bslalg_typetraitusesbslmaallocator.cpp
+
+ar -rcs lib_bslalg.a \
+  bslalg_arraydestructionprimitives.o \
+  bslalg_arrayprimitives.o \
+  bslalg_autoarraydestructor.o \
+  bslalg_autoarraymovedestructor.o \
+  bslalg_autoscalardestructor.o \
+  bslalg_bidirectionallink.o \
+  bslalg_bidirectionallinklistutil.o \
+  bslalg_bidirectionalnode.o \
+  bslalg_constructorproxy.o \
+  bslalg_containerbase.o \
+  bslalg_dequeimputil.o \
+  bslalg_dequeiterator.o \
+  bslalg_dequeprimitives.o \
+  bslalg_functoradapter.o \
+  bslalg_hashtableanchor.o \
+  bslalg_hashtablebucket.o \
+  bslalg_hashtableimputil.o \
+  bslalg_hashutil.o \
+  bslalg_hasstliterators.o \
+  bslalg_hastrait.o \
+  bslalg_rangecompare.o \
+  bslalg_rbtreeanchor.o \
+  bslalg_rbtreenode.o \
+  bslalg_rbtreeutil.o \
+  bslalg_scalardestructionprimitives.o \
+  bslalg_scalarprimitives.o \
+  bslalg_selecttrait.o \
+  bslalg_swaputil.o \
+  bslalg_typetraitbitwisecopyable.o \
+  bslalg_typetraitbitwisecopyable.t.o \
+  bslalg_typetraitbitwiseequalitycomparable.o \
+  bslalg_typetraitbitwisemoveable.o \
+  bslalg_typetraithaspointersemantics.o \
+  bslalg_typetraithasstliterators.o \
+  bslalg_typetraithastrivialdefaultconstructor.o \
+  bslalg_typetraitnil.o \
+  bslalg_typetraitpair.o \
+  bslalg_typetraits.o \
+  bslalg_typetraitusesbslmaallocator.o \

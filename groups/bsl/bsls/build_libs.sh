@@ -1,6 +1,6 @@
 set -x
 PATHS="-I ."
-FLAGS="-O0 -filetype=o -stat"
+FLAGS="-O0 -filetype=o -fPIC -stat"
 
 circle $PATHS $FLAGS bsls_alignedbuffer.cpp
 circle $PATHS $FLAGS bsls_alignment.cpp
@@ -79,3 +79,82 @@ circle $PATHS $FLAGS bsls_timeutil.cpp
 circle $PATHS $FLAGS bsls_types.cpp
 circle $PATHS $FLAGS bsls_unspecifiedbool.cpp
 circle $PATHS $FLAGS bsls_util.cpp
+
+ar rcs lib_bsls.a \
+  bsls_alignedbuffer.o \
+  bsls_alignment.o \
+  bsls_alignmentfromtype.o \
+  bsls_alignmentimp.o \
+  bsls_alignmenttotype.o \
+  bsls_alignmentutil.o \
+  bsls_annotation.o \
+  bsls_assert.o \
+  bsls_assertimputil.o \
+  bsls_assert_macroreset.o \
+  bsls_asserttest.o \
+  bsls_asserttestexception.o \
+  bsls_asserttest_macroreset.o \
+  bsls_atomic.o \
+  bsls_atomicoperations_all_all_clangintrinsics.o \
+  bsls_atomicoperations_all_all_gccintrinsics.o \
+  bsls_atomicoperations_arm_all_gcc.o \
+  bsls_atomicoperations.o \
+  bsls_atomicoperations_default.o \
+  bsls_atomicoperations_ia64_hp_acc.o \
+  bsls_atomicoperations_powerpc32_aix_xlc.o \
+  bsls_atomicoperations_powerpc64_aix_xlc.o \
+  bsls_atomicoperations_powerpc_aix_xlc_default.o \
+  bsls_atomicoperations_powerpc_all_gcc.o \
+  bsls_atomicoperations_sparc32_sun_cc.o \
+  bsls_atomicoperations_sparc64_sun_cc.o \
+  bsls_atomicoperations_sparc_sun_cc_default.o \
+  bsls_atomicoperations_x64_all_gcc.o \
+  bsls_atomicoperations_x64_win_msvc.o \
+  bsls_atomicoperations_x86_all_gcc.o \
+  bsls_atomicoperations_x86_win_msvc.o \
+  bsls_blockgrowth.o \
+  bsls_bsldeprecationinformation.o \
+  bsls_bslexceptionutil.o \
+  bsls_bsllock.o \
+  bsls_bslonce.o \
+  bsls_bsltestutil.o \
+  bsls_buildtarget.o \
+  bsls_byteorder.o \
+  bsls_byteorderutil.o \
+  bsls_byteorderutil_impl.o \
+  bsls_compilerfeatures.o \
+  bsls_cpp11.o \
+  bsls_dbghelpdllimpl_windows.o \
+  bsls_deprecate.o \
+  bsls_exceptionutil.o \
+  bsls_ident.o \
+  bsls_int64.o \
+  bsls_keyword.o \
+  bsls_libraryfeatures.o \
+  bsls_linkcoercion.o \
+  bsls_log.o \
+  bsls_logseverity.o \
+  bsls_macroincrement.o \
+  bsls_macrorepeat.o \
+  bsls_nameof.o \
+  bsls_nativestd.o \
+  bsls_nullptr.o \
+  bsls_objectbuffer.o \
+  bsls_outputredirector.o \
+  bsls_performancehint.o \
+  bsls_platform.o \
+  bsls_platformutil.o \
+  bsls_pointercastutil.o \
+  bsls_protocoltest.o \
+  bsls_review.o \
+  bsls_review_macroreset.o \
+  bsls_spinlock.o \
+  bsls_stackaddressutil.o \
+  bsls_stopwatch.o \
+  bsls_systemclocktype.o \
+  bsls_systemtime.o \
+  bsls_timeinterval.o \
+  bsls_timeutil.o \
+  bsls_types.o \
+  bsls_unspecifiedbool.o \
+  bsls_util.o
