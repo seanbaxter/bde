@@ -2429,7 +2429,7 @@ int main(int argc, char *argv[])
                     "32229481658085593321233482747978262041447231687381771809"
                     "19299881250404026184124858368" // output
                 },
-#else BSLS_PLATFORM_OS_AIX
+#else 
                 {
                     L_,                       // line
                     DBL_MAX,                  // input
