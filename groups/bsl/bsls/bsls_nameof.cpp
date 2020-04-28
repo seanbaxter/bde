@@ -96,6 +96,7 @@ const char *NameOf_Base::initBuffer(char       *buffer,
     const char uselessPreamble[] = {            "BloombergLP::bsls::NameOf<" };
 #endif
 
+#ifndef __circle_lang__
     static
     const char compileTimeAssertArray[
                 sizeof(uselessPreamble) == k_USELESS_PREAMBLE_LEN + 1] = { 0 };
@@ -117,6 +118,7 @@ const char *NameOf_Base::initBuffer(char       *buffer,
 
         return functionName;                                          // RETURN
     }
+#endif // __circle_lang__
 
 #if defined(BSLS_PLATFORM_CMP_SUN)
     // Must truncate 'functionName' to buffer size.
@@ -131,7 +133,10 @@ const char *NameOf_Base::initBuffer(char       *buffer,
 #endif
     const char *end;
 
-#if defined(BSLS_PLATFORM_CMP_GNU) && !defined(BSLS_PLATFORM_CMP_CLANG)
+#if defined(__circle_lang__)
+    end = pc + std::strlen(pc);
+
+#elif defined(BSLS_PLATFORM_CMP_GNU) && !defined(BSLS_PLATFORM_CMP_CLANG)
     // If typename == 'int',
 
     // functionName:
@@ -279,6 +284,10 @@ const char *NameOf_Base::initBuffer(char       *buffer,
     u::substitute(buffer, longName, stringName);
     u::substitute(longName, "std::", "bsl::");
     u::substitute(buffer, longName,  "bsl::basic_string<char>");
+
+   char longName2[] = { "bsl::basic_string<char,"
+       " std::char_traits<char>, bsl::allocator<char>>" };
+   u::substitute(buffer, longName2, "bsl::basic_string<char>");
 
 #   endif
 # endif

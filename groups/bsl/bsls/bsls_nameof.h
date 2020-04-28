@@ -182,6 +182,8 @@ class NameOf_Base {
 # else
     enum { k_USELESS_PREAMBLE_LEN = 37 };
 # endif
+#elif defined(__circle_lang__)
+    enum { k_USELESS_PREAMBLE_LEN = 0 };
 #else
     enum { k_USELESS_PREAMBLE_LEN = 26 };
 #endif
@@ -251,7 +253,10 @@ NameOf<TYPE>::NameOf()
     BslOnceGuard   onceGuard;
 
     if (!s_buffer_p && onceGuard.enter(&once)) {
-#if   defined(BSLS_PLATFORM_CMP_GNU) || defined(BSLS_PLATFORM_CMP_CLANG)
+#if defined(__circle_lang__)
+        static char buffer[sizeof(@type_name(TYPE, true))];
+        s_buffer_p = initBuffer(buffer, @type_name(TYPE, true));
+#elif defined(BSLS_PLATFORM_CMP_GNU) || defined(BSLS_PLATFORM_CMP_CLANG)
         static char buffer[sizeof(__PRETTY_FUNCTION__) -
                                                        k_USELESS_PREAMBLE_LEN];
         s_buffer_p = initBuffer(buffer, __PRETTY_FUNCTION__);
