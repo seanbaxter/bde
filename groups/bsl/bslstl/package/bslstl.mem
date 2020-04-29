@@ -11,7 +11,8 @@ bslstl_chrono
 bslstl_complex
 bslstl_defaultsearcher
 bslstl_deque
-bslstl_deque_test
+bslstl_deque_test1
+bslstl_deque_test2
 bslstl_equalto
 bslstl_errc
 bslstl_error
@@ -19,7 +20,8 @@ bslstl_forwarditerator
 bslstl_function
 bslstl_hash
 bslstl_hashtable
-bslstl_hashtable_test
+bslstl_hashtable_test1
+bslstl_hashtable_test2
 bslstl_hashtablebucketiterator
 bslstl_hashtableiterator
 bslstl_iosfwd
@@ -31,7 +33,9 @@ bslstl_iteratorutil
 bslstl_list
 bslstl_list_test
 bslstl_map
-bslstl_map_test
+bslstl_map_test1
+bslstl_map_test2
+bslstl_map_test3
 bslstl_mapcomparator
 bslstl_multimap
 bslstl_multimap_test
@@ -77,4 +81,5 @@ bslstl_unorderedset
 bslstl_unorderedset_test
 bslstl_unorderedsetkeyconfiguration
 bslstl_vector
-bslstl_vector_test
+bslstl_vector_test1
+bslstl_vector_test2

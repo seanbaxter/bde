@@ -13,9 +13,9 @@ BSLS_IDENT("$Id: $")
 //
 //@DESCRIPTION: This component provides a second translation unit for
 // 'multiset' test cases to reduce the test-driver's build time.  Test cases
-// 1-11, plus the usage example test, are in the original component test
-// driver, the remaining tests (11 and higher) are in this subordinate
-// components test driver.
+// 1-8, plus the usage example test, are in the original component test
+// driver, the remaining tests (9 and higher) are in this subordinate
+// component's test driver.
 //
 // As the number of test concerns grows, and the number of types to instantiate
 // 'multiset' with in order to gain complete code coverage grows, we have
@@ -30,7 +30,7 @@ BSLS_IDENT("$Id: $")
 
 #endif
 // ----------------------------------------------------------------------------
-// Copyright 2019 Bloomberg Finance L.P.
+// Copyright 2020 Bloomberg Finance L.P.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

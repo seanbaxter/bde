@@ -33,7 +33,7 @@ BSLS_IDENT("$Id: $")
 //:   o 'linkedVariable' [optional], and
 //:   o 'constraint' [optional]
 //
-//: o the 'occurrenceInfo' attribute (see {'balcl_occurrenceinfo}') that, in
+//: o the 'occurrenceInfo' attribute (see {'balcl_occurrenceinfo'}) that, in
 //:   turn, consists of:
 //:   o 'occurrenceType' (required, optional, or hidden)
 //:   o 'defaulValue' [optional]
@@ -143,7 +143,7 @@ class Option {
     Option& operator=(const Option&     rhs);
     Option& operator=(const OptionInfo& rhs);
         // Assign to this object the value of the specified 'rhs' object and
-        // return a reference to this modifiable object.
+        // return a reference providing modifiable access to this object.
 
     // ACCESSORS
     operator const OptionInfo&() const;

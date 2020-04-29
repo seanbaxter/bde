@@ -18,23 +18,27 @@
 #include <bdlma_sequentialallocator.h>
 #include <bdls_filesystemutil.h>
 #include <bdls_pathutil.h>
-#include <bdlt_currenttime.h>
 
 #include <bslim_testutil.h>
 
 #include <bslma_defaultallocatorguard.h>
 #include <bslma_testallocator.h>
 #include <bslmf_assert.h>
+#include <bslmt_threadgroup.h>
 #include <bslmt_threadutil.h>
 
+#include <bsls_atomic.h>
 #include <bsls_log.h>
 #include <bsls_platform.h>
+#include <bsls_spinlock.h>
 #include <bsls_stopwatch.h>
 #include <bsls_stackaddressutil.h>
+#include <bsls_systemtime.h>
 #include <bsls_timeinterval.h>
 #include <bsls_types.h>
 
 #include <bsl_algorithm.h>
+#include <bsl_climits.h>
 #include <bsl_cstdio.h>
 #include <bsl_cstdlib.h>
 #include <bsl_cstring.h>
@@ -427,9 +431,12 @@ void testStackTrace(const balst::StackTrace& st, int tolerateMisses = 0)
 {
     LOOP_ASSERT(st.length(), st.length() > 0);
 
-    bool reachedMain = false;   // all the routines above 'main' are pretty
-                                // small
+    bool reachedMain = false, pastMain = false;   // The trace above, at, and
+                                                  // below 'main' have
+                                                  // different properties.
+
     int numMisses = 0;
+
     for (int i = 0; i < st.length(); ++i) {
         const Frame& frame = st[i];
 
@@ -443,13 +450,15 @@ void testStackTrace(const balst::StackTrace& st, int tolerateMisses = 0)
             continue;
         }
 
-        ASSERT((PLAT_WIN && !DEBUG_ON) || frame.isSymbolNameKnown());
         if (npos != frame.symbolName().find("main")) {
             reachedMain = true;
         }
 
+        ASSERT((PLAT_WIN && !DEBUG_ON) || pastMain ||
+                                                    frame.isSymbolNameKnown());
+
         if (!PLAT_WIN || DEBUG_ON) {
-            LOOP_ASSERT(i, frame.isOffsetFromSymbolKnown());
+            LOOP_ASSERT(i, pastMain || frame.isOffsetFromSymbolKnown());
 
             UintPtr offset = frame.offsetFromSymbol();
             const unsigned int maxOffset = 2048;
@@ -458,11 +467,11 @@ void testStackTrace(const balst::StackTrace& st, int tolerateMisses = 0)
         }
 
         if (!(FORMAT_ELF && !FORMAT_DWARF) && !FORMAT_DLADDR && DEBUG_ON &&
-                                                                !reachedMain) {
+                                                                !pastMain) {
             ASSERT(frame.isSourceFileNameKnown());
         }
 
-        if (!FORMAT_ELF && !FORMAT_DLADDR && DEBUG_ON && !reachedMain) {
+        if (!FORMAT_ELF && !FORMAT_DLADDR && DEBUG_ON && !pastMain) {
             ASSERT(frame.lineNumber() > 0);
         }
         else if (FORMAT_XCOFF && DEBUG_ON) {
@@ -472,6 +481,8 @@ void testStackTrace(const balst::StackTrace& st, int tolerateMisses = 0)
 
             numMisses += frame.lineNumber() < 0;
         }
+
+        pastMain |= reachedMain;
     }
 
     ASSERT(numMisses <= tolerateMisses);
@@ -775,7 +786,21 @@ namespace NS_10_4 {
 #define BALST_STACKTRACEUTIL_TEST_10_SYMBOLS
 #endif
 
-void topOfTheStack(void *, void *, void *, void *)
+bsls::TimeInterval start;            // initialized from 'main'
+bsls::AtomicInt    threadId(0);
+
+bool mainFound = false;
+int  tracesDone = 0;
+int  minTracesDone = INT_MAX;
+
+inline
+double elapsed()
+{
+    bsls::TimeInterval diff = bsls::SystemTime::nowMonotonicClock() - start;
+    return diff.totalSecondsAsDouble();
+}
+
+void topOfTheStack(void *, void *, void *, int numRecurses)
 {
     ST st;
 
@@ -783,76 +808,89 @@ void topOfTheStack(void *, void *, void *, void *)
     LOOP_ASSERT(rc, 0 == rc);
 
 #if defined(BALST_STACKTRACEUTIL_TEST_10_SYMBOLS)
-    const int len = st.length();
+    const int         len  = st.length();
+    const bsl::size_t npos = bsl::string::npos;
 
-    bool tots = false;
-    bool rabo = false;
-    bool lffs = false;
-    bool tc10 = false;
-    bool ns2  = false;
-    bool ns3  = false;
-    bool ns4  = false;
+    int tots = 0;
+    int rabo = 0;
+    int lffs = 0;
+    int tc10 = 0;
+    int ns2  = 0;
+    int ns3  = 0;
+    int ns4  = 0;
 
     for (int i = narcissicStack; i < len; ++i) {
         const bsl::string& s = st[i].symbolName();
-        const bsl::size_t npos = bsl::string::npos;
 
-        if (!tots && npos != s.find("topOfTheStack")) {
-            tots = true;
+        if (npos != s.find("topOfTheStack")) {
+            ++tots;
         }
-        if (!rabo && npos != s.find("recurseABunchOfTimes")) {
-            rabo = true;
+        if (npos != s.find("recurseABunchOfTimes")) {
+            ++rabo;
         }
-        if (!lffs && npos != s.find("loopForFourSeconds")) {
-            lffs = true;
+        if (npos != s.find("loopForSevenSeconds")) {
+            ++lffs;
         }
-        if (!tc10 && npos != s.find("BALST_STACKTRACEUTIL_TEST_CASE_10")) {
-            tc10 = true;
+        if (npos != s.find("BALST_STACKTRACEUTIL_TEST_CASE_10")) {
+            ++tc10;
         }
-        if (!ns2  && npos != s.find("NS_10_2")) {
-            ns2  = true;
+        if (npos != s.find("NS_10_2")) {
+            ++ns2;
         }
-        if (!ns3  && npos != s.find("NS_10_3")) {
-            ns3  = true;
+        if (npos != s.find("NS_10_3")) {
+            ++ns3;
         }
-        if (!ns4  && npos != s.find("NS_10_4")) {
-            ns4  = true;
+        if (npos != s.find("NS_10_4")) {
+            ++ns4;
+        }
+        if (npos != s.find("main")) {
+            mainFound = true;
         }
     }
 
-    ASSERT(tots);
-    ASSERT(rabo);
-    ASSERT(lffs);
-    ASSERT(tc10);
-    ASSERT(ns2);
-    ASSERT(ns3);
-    ASSERT(ns4);
+    ASSERT(1 == tots);
+    ASSERTV(numRecurses, rabo, numRecurses == rabo);
+    ASSERT(1 == lffs);
+    ASSERTV(numRecurses, tc10, numRecurses + 2 == tc10);
+    ASSERTV(numRecurses, ns2,  numRecurses + 2 == ns2);
+    ASSERTV(numRecurses, ns3,  numRecurses + 2 == ns3);
+    ASSERTV(numRecurses, ns4,  numRecurses + 2 == ns4);
 #endif
 }
 
-void recurseABunchOfTimes(int *depth, int, void *, int, void *)
+void recurseABunchOfTimes(int *depth, int, void *, int, int numRecurses)
 {
     if (--*depth <= 0) {
-        topOfTheStack(depth, depth, depth, depth);
+        topOfTheStack(depth, depth, depth, numRecurses);
     }
     else {
-        recurseABunchOfTimes(depth, 0, depth, 0, depth);
+        recurseABunchOfTimes(depth, 0, depth, 0, numRecurses);
     }
 
     ++*depth;
 }
 
-void loopForFourSeconds()
+void loopForSevenSeconds()
 {
-    bsls::TimeInterval start = bdlt::CurrentTime::now();
+    // 'numRecurses' is the number of times 'recurseABunchOfTimes' occurs on
+    // the stack.  The idea here is that it varies between threads, to make
+    // sure that all threads aren't doing exactly the same stack traces.
 
+    const int numRecurses     = threadId++ % 10 + 10;
+    int       localTracesDone = 0;
     do {
-        int depth = 20;
-        for (int i = 0; i < 100; ++i) {
-            recurseABunchOfTimes(&depth, 0, &i, 0, &i);
-            ASSERT(20 == depth);
+        int depth = numRecurses;
+        for (int i = 0; i < 10; ++i, ++localTracesDone) {
+            recurseABunchOfTimes(&depth, 0, &i, 0, numRecurses);
+            ASSERT(numRecurses == depth);
         }
-    } while ((bdlt::CurrentTime::now() - start).totalSecondsAsDouble() < 4);
+    } while (elapsed() < 7);
+
+    static bsls::SpinLock lock = BSLS_SPINLOCK_UNLOCKED;
+    bsls::SpinLockGuard guard(&lock);
+
+    tracesDone    += localTracesDone;
+    minTracesDone =  bsl::min(localTracesDone, minTracesDone);
 }
 
 }  // close namespace NS_10_4
@@ -2376,15 +2414,18 @@ int main(int argc, char *argv[])
         namespace TC1 = BALST_STACKTRACEUTIL_TEST_CASE_10;
         namespace TC = TC1::NS_10_2::NS_10_3::NS_10_4;
 
-        bsl::function<void()> func = &TC::loopForFourSeconds;
-        bslmt::ThreadUtil::Handle handles[2];
-        for (int i = 0; i < 2; ++i) {
-            int rc = bslmt::ThreadUtil::create(&handles[i], func);
-            ASSERT(0 == rc);
-        }
-        for (int i = 0; i < 2; ++i) {
-            int rc = bslmt::ThreadUtil::join(handles[i]);
-            ASSERT(0 == rc);
+        bslma::TestAllocator ta;
+        bslmt::ThreadGroup   tg(&ta);
+
+        TC::start = bsls::SystemTime::nowMonotonicClock();
+
+        tg.addThreads(&TC::loopForSevenSeconds, 100);
+        tg.joinAll();
+
+        ASSERT(! TC::mainFound);
+
+        if (verbose) {
+            P_(TC::elapsed());    P_(TC::tracesDone);    P(TC::minTracesDone);
         }
       } break;
       case 9: {

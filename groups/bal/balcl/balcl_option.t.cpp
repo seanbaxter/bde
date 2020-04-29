@@ -798,7 +798,7 @@ struct TypesParser {
     static int parse(TYPE        *result,
                      const char **endPos,
                      const char  *inputString);
-        // Load to the specified 'result' the 'TYPE' value represented at the
+        // Load into the specified 'result' the 'TYPE' value represented at the
         // specified 'inputString'.  The specified '*endPos' is set to one past
         // the parsed value or to the position at which a parse error is
         // detected.  Return 0 on success and a non-zero value otherwise.  The
@@ -814,7 +814,7 @@ struct TypesParser {
     static int parseQuotedString(bsl::string  *result,
                                  const char  **endPos,
                                  const char   *inputString);
-        // Load to the specified 'result' the next double quote (i.e., '"')
+        // Load into the specified 'result' the next double quote (i.e., '"')
         // delimited sequence of characters found at the specified
         // 'inputString'.  The specified '*endPos' is set to one past the
         // parsed value or to the position at which a parse error is detected.
@@ -1164,7 +1164,7 @@ void setLinkedVariable(TypeInfo *typeInfo, ElemType type, void *address)
 void setType(TypeInfo *typeInfo, ElemType type)
     // Set the 'balcl::OptionType' element of the specified 'typeInfo' to the
     // specified 'type'.  The behavior is undefined unless
-    // 'Ot::e_VOID != type').  Note that this resets both the linked variable
+    // 'Ot::e_VOID != type'.  Note that this resets both the linked variable
     // and constraint of 'typeInfo'.
 {
     ASSERT(typeInfo);
@@ -3213,9 +3213,8 @@ int main(int argc, const char *argv[])  {
 
                     bsls::AssertTestHandlerGuard hG;
 
-#if defined(BSLS_PLATFORM_OS_WINDOWS)                                         \
- && defined(BSLS_PLATFORM_CMP_MSVC)                                           \
- && BSLS_PLATFORM_CMP_VERSION <= 1900 // MSVC 2015 (warning)
+                    // Redundant parentheses below suppress compilation
+                    // warnings on some platforms (Windows/MSVC).
 
                     if (OptionInfo::e_NON_OPTION == X.argType()) {
                         ASSERT_FAIL(( LONG_TAG == X. longTag()));
@@ -3224,16 +3223,6 @@ int main(int argc, const char *argv[])  {
                         ASSERT_PASS(( LONG_TAG == X. longTag()));
                         ASSERT_PASS((SHORT_TAG == X.shortTag()));
                     }
-#else
-                    if (OptionInfo::e_NON_OPTION == X.argType()) {
-                        ASSERT_FAIL( LONG_TAG == X. longTag());
-                        ASSERT_FAIL(SHORT_TAG == X.shortTag());
-                    } else {
-                        ASSERT_PASS( LONG_TAG == X. longTag());
-                        ASSERT_PASS(SHORT_TAG == X.shortTag());
-                    }
-
-#endif
                 }
 
                 // Simple validating accessors.
