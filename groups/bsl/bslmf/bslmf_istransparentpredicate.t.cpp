@@ -556,7 +556,7 @@ struct PublicChildOfTransparentTemplateType : public TYPE
 {};
 
 // Following two types are defined to shorten records and preserve table format
-// in the tests.
+// in the tests. 
 //
 typedef PublicChildOfTransparentTemplateType<TransparentComp>    PCOTTTTC;
 typedef PublicChildOfTransparentTemplateType<NonTransparentComp> PCOTTTNTC;

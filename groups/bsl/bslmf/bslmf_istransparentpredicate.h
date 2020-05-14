@@ -405,6 +405,15 @@ BSLS_IDENT("$Id: $")
 namespace BloombergLP {
 namespace bslmf {
 
+#ifdef __circle_lang__
+
+template <class COMPARATOR, class KEY, class = void>
+struct IsTransparentPredicate :
+  bsl::integral_constant<bool, __is_transparent(COMPARATOR)> { };
+
+
+#else
+
 template <class COMPARATOR, class KEY, class = void>
 struct IsTransparentPredicate : bsl::false_type {
     // This 'struct' template implements a meta-function to determine whether
@@ -423,6 +432,8 @@ struct IsTransparentPredicate<
     // This specialization of 'IsTransparentPredicate', for when the (template
     // parameter) 'COMPARATOR' is transparent, derives from 'bsl::true_type'.
 };
+
+#endif
 
 }  // close package namespace
 }  // close enterprise namespace
