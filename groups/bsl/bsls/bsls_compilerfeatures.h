@@ -776,6 +776,10 @@ BSLS_IDENT("$Id: $")
 //      PLATFORM SPECIFIC FEATURE DETECTION AND MACRO DEFINITIONS
 // ============================================================================
 
+# if defined(__circle_lang__)
+#   define BSLS_COMPILERFEATURES_PP_LINE_IS_ON_FIRST
+# endif
+
 //GCC
 //  https://wiki.apache.org/stdcxx/C%2B%2B0xCompilerSupport
 // As GCC tracked the evolving C++11 standard, earlier versions of the compiler

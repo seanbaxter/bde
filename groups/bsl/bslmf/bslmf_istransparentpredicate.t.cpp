@@ -632,7 +632,7 @@ void verifyNonTransparency()
 InvertNonTransparencyTest(AmbiguousChildOfTransparentType)
 #endif
 
-#if defined(BSLS_PLATFORM_CMP_CLANG)
+#if defined(BSLS_PLATFORM_CMP_CLANG) && !defined(__circle_lang__)
 // Clang does not consider that a class named 'is_transparent' is transparent,
 // It's not clear whether the injected name 'is_transparent::is_transparent'
 // should pass the transparency test or not.
