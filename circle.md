@@ -4,12 +4,9 @@ The latest public executable of Circle [build 98](http://circle-lang.org/linux/b
 
 To build and run the tests:
 
-1. **Clone [bde-tools](https://github.com/bloomberg/bde-tools) and add its /bin to your path**
+1. **Clone the [Circle bde-tools fork](https://github.com/seanbaxter/bde-tools/tree/circle_dev) and add its /bin to your path**
 
-```
-$ git clone git@github.com:bloomberg/bde-tools
-$ export PATH=~/bde-tools/bin:$PATH
-```
+The fork is only 4 additional lines in bde_ufid.cmake to declare the compiler.
 
 2. **Add Circle as a recognized BDE C++ compiler by inserting this text into ~/.bdecompilerconfig**
 
