@@ -1,6 +1,6 @@
 # Building BDE tests with Circle
 
-The latest public executable of Circle [build 98](http://circle-lang.org/linux/build_98.tgz) compiles and runs all tests in BDE. This patch set adds a couple of Circle-specific additions and workarounds. The only extensive change is a unique code path to support the `NameOf` operator, which requires compiler-specific logic.
+The latest public executable of Circle [build 98](http://circle-lang.org/linux/build_98.tgz) compiles and runs all tests in BDE on this branch (https://github.com/seanbaxter/bde branch circle_dev). This patch set adds a couple of Circle-specific additions and workarounds. The only extensive change is a unique code path to support the `NameOf` operator, which requires compiler-specific logic.
 
 To build and run the tests:
 
