@@ -2426,6 +2426,14 @@ int main(int argc, char *argv[])
                 {  L_, "\"A\\U7G00B\"",  -1, "A",                     -1, 0  },
                 {  L_, "\"A\\UXXXXB\"",  -1, "A",                     -1, 0  },
 
+                // Values that 'strtol' accepts - '{DRQS 162368243}'.
+                {  L_, "\"\\U0xFF\"",    -1, ERROR_VALUE,             -1, 0  },
+                {  L_, "\"\\U   4\"",    -1, ERROR_VALUE,             -1, 0  },
+                {  L_, "\"\\U  -1\"",    -1, ERROR_VALUE,             -1, 0  },
+                {  L_, "\"\\ud83d\\u0xFF\"", -1, ERROR_VALUE,         -1, 0  },
+                {  L_, "\"\\ud83d\\u   4\"", -1, ERROR_VALUE,         -1, 0  },
+                {  L_, "\"\\ud83d\\u  -1\"", -1, ERROR_VALUE,         -1, 0  },
+
                 // These error strings were copied from
                 // 'bdlde_charconvertutf32' test driver.
 
@@ -3221,11 +3229,17 @@ int main(int argc, char *argv[])
     {  L_,         "0x256",         ERROR_VALUE,      false   },
     {  L_,         "JUNK",          ERROR_VALUE,      false   },
     {  L_,         "DEADBEEF",      ERROR_VALUE,      false   },
+
+    {  L_,   "1E",                  ERROR_VALUE,      false   },
+    {  L_,   "1E+",                 ERROR_VALUE,      false   },
+    {  L_,   "1E-",                 ERROR_VALUE,      false   },
+    {  L_,   "1E9999999999",        ERROR_VALUE,      false   },
+    {  L_,   "1E-9999999999",       ERROR_VALUE,      false   },
             };
             const int NUM_DATA = sizeof(DATA) / sizeof(*DATA);
 
             for (int i = 0; i < NUM_DATA; ++i) {
-                const int     LINE     = DATA[i].d_line;
+                const int    LINE     = DATA[i].d_line;
                 const string INPUT    = DATA[i].d_input_p;
                 const Type   EXP      = DATA[i].d_exp;
                 const bool   IS_VALID = DATA[i].d_isValid;
@@ -3246,6 +3260,16 @@ int main(int argc, char *argv[])
                 LOOP4_ASSERT(LINE, INPUT, EXP, value, EXP == value);
 
                 ASSERTV(LINE, da.numBlocksTotal(), 0 == da.numBlocksTotal());
+            }
+
+            for (int i = 0; i <= 255; ++i) {
+                char      c        = static_cast<char>(i);
+                StringRef isb(&c, 1);
+                bool      is_valid = '0' <= c && c <= '9';
+                Type      value    = ERROR_VALUE;
+                const int rc       = Util::getValue(&value, isb);
+                ASSERTV(rc, i, is_valid, is_valid == (0 == rc));
+                ASSERTV(value, is_valid, !is_valid || value == i - '0');
             }
         }
       } break;

@@ -10,6 +10,7 @@ BSLS_IDENT_RCSID(baljsn_parserutil_cpp,"$Id$ $CSID$")
 #include <bdlde_charconvertutf32.h>
 
 #include <bdlb_chartype.h>
+#include <bdlb_numericparseutil.h>
 #include <bdlb_string.h>
 
 #include <bdldfp_decimalutil.h>
@@ -189,32 +190,26 @@ int ParserUtil::getString(bsl::string *value, bslstl::StringRef data)
 
                 enum { k_NUM_UNICODE_DIGITS = 4 };
 
-                if (iter + k_NUM_UNICODE_DIGITS >= end) {
+                if (k_NUM_UNICODE_DIGITS >= end - iter) {
                     return -1;                                        // RETURN
                 }
 
                 ++iter;
 
-                char tmp[k_NUM_UNICODE_DIGITS + 1];
-                bsl::strncpy(tmp, iter, k_NUM_UNICODE_DIGITS);
-                tmp[k_NUM_UNICODE_DIGITS] = '\0';
-
-                char         *last = 0;
-                unsigned int  utf32input;
-
-                utf32input = static_cast<unsigned int>(
-                                                  bsl::strtol(tmp, &last, 16));
-
-                if (last == tmp || *last != '\0') {
+                bsls::Types::Uint64 digits;
+                bslstl::StringRef   rest;
+                if (bdlb::NumericParseUtil::parseUnsignedInteger(
+                        &digits,
+                        &rest,
+                        bslstl::StringRef(iter, k_NUM_UNICODE_DIGITS),
+                        16,
+                        0xFFFFULL,
+                        k_NUM_UNICODE_DIGITS) != 0 ||
+                    rest.size() > 0) {
                     return -1;                                        // RETURN
                 }
 
-                unsigned int first = utf32input;
-
-                // Confirm that only the lower two bytes are set.
-
-                BSLS_ASSERT(0 == (first & 0xFF000000)
-                         && 0 == (first & 0x00FF0000));
+                unsigned int utf32input = static_cast<unsigned int>(digits);
 
                 // Value by which to increment 'iter'.  (3 instead of 4 because
                 // 'iter' is incremented at the end of the function.)
@@ -223,6 +218,9 @@ int ParserUtil::getString(bsl::string *value, bslstl::StringRef data)
                 // Check for supplementary plane encodings.  These consist of a
                 // pair of unicode 16-bit values, the first in 'D800..DBFF' and
                 // the second in 'DC00..DFFF'.
+
+                unsigned int first = utf32input;
+
                 if (0xD800 <= first && first <= 0xDBFF) {
                     // Check that another unicode escape sequence follows.
                     if (iter + 2 * k_NUM_UNICODE_DIGITS + 2 >= end) {
@@ -235,23 +233,22 @@ int ParserUtil::getString(bsl::string *value, bslstl::StringRef data)
                         'U' != iter[k_NUM_UNICODE_DIGITS + 1]) {
                         return -1;                                    // RETURN
                     }
-                    for (int i = 0; i < k_NUM_UNICODE_DIGITS; ++i) {
-                        if (0 == iter[k_NUM_UNICODE_DIGITS + 2 + i]) {
-                            return -1;                                // RETURN
-                        }
-                    }
-                    bsl::strncpy(tmp,
-                                 iter + k_NUM_UNICODE_DIGITS + 2,
-                                 k_NUM_UNICODE_DIGITS);
-                    tmp[k_NUM_UNICODE_DIGITS] = '\0';
-                    unsigned int second = static_cast<unsigned int>(
-                                                  bsl::strtol(tmp, &last, 16));
-                    if (last == tmp || *last != '\0') {
+
+                    if (bdlb::NumericParseUtil::parseUnsignedInteger(
+                            &digits,
+                            &rest,
+                            bslstl::StringRef(iter + k_NUM_UNICODE_DIGITS + 2,
+                                              k_NUM_UNICODE_DIGITS),
+                            16,
+                            0xDFFFULL,
+                            k_NUM_UNICODE_DIGITS) != 0 ||
+                        rest.size() > 0 ||
+                        digits < 0xDC00) {
                         return -1;                                    // RETURN
                     }
-                    if (second < 0xDC00 || second > 0xDFFF) {
-                        return -1;                                    // RETURN
-                    }
+
+                    unsigned int second = static_cast<unsigned int>(digits);
+
                     // Combine the two 16-bit halves into one 21-bit whole.
                     utf32input = 0x010000 +
                                     ((first - 0xD800) << 10) +
@@ -383,7 +380,7 @@ int ParserUtil::getValue(double *value, bslstl::StringRef data)
      || (0        == tmp && 0 != errno)
      ||  HUGE_VAL == tmp
      || -HUGE_VAL == tmp
-     || !bsl::isdigit(*(dataString.end() - 1))) {
+     || !bdlb::CharType::isDigit(*(dataString.end() - 1))) {
         return -1;                                                    // RETURN
     }
 
@@ -400,7 +397,7 @@ int ParserUtil::getUint64(bsls::Types::Uint64 *value,
     // Extract leading digits and store their range in [valueBegin..valueEnd)
 
     const char *valueBegin = iter;
-    while (iter < end && bsl::isdigit(*iter)) {
+    while (iter < end && bdlb::CharType::isDigit(*iter)) {
         ++iter;
     }
     const char *valueEnd = iter;
@@ -417,7 +414,7 @@ int ParserUtil::getUint64(bsls::Types::Uint64 *value,
     if (iter < end && '.' == *iter) {
 
         fractionalBegin = ++iter;
-        while (iter < end && bsl::isdigit(*iter)) {
+        while (iter < end && bdlb::CharType::isDigit(*iter)) {
             ++iter;
         }
         fractionalEnd = iter;
@@ -428,26 +425,32 @@ int ParserUtil::getUint64(bsls::Types::Uint64 *value,
 
     int  exponent = 0;
     bool isExpNegative = false;
-    if ('E' == static_cast<char>(bsl::toupper(*iter))) {
-
-        ++iter;
+    if (iter < end && 'E' == static_cast<char>(bsl::toupper(*iter))) {
+        if (++iter == end) {
+            return -1;                                                // RETURN
+        }
         if ('-' == *iter) {
             isExpNegative = true;
-            ++iter;
+            if (++iter == end) {
+                return -1;                                            // RETURN
+            }
         }
-        else {
-            if ('+' == *iter) {
-                ++iter;
+        else if ('+' == *iter) {
+            if (++iter == end) {
+                return -1;                                            // RETURN
             }
         }
 
-        while (iter < end && bsl::isdigit(*iter)) {
+        while (iter < end && bdlb::CharType::isDigit(*iter)) {
+            if (exponent > bsl::numeric_limits<int>::max() / 10) {
+                return -1;                                            // RETURN
+            }
             exponent = exponent * 10 + *iter - '0';
             ++iter;
         }
     }
 
-    if (iter < end && !bsl::isdigit(*iter)) {
+    if (iter < end && !bdlb::CharType::isDigit(*iter)) {
         return -1;                                                    // RETURN
     }
 
