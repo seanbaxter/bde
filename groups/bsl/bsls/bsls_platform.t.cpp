@@ -1633,49 +1633,6 @@ int main(int argc, char *argv[])
     }
 
     switch (test) { case 0:
-      case 5: {
-        // --------------------------------------------------------------------
-        // TESTING SSE MACROS
-        //
-        // Concerns:
-        //: 1 Runtime detection of SSE availability matches macro definitions.
-        //
-        // Plan:
-        //: 1 Use 'cpuinfo' to verify macro settings.
-        //
-        // Testing
-        //   BSLS_PLATFORM_CPU_SSE*
-        // --------------------------------------------------------------------
-
-        if (verbose) printf("\nTESTING SSE MACROS"
-                            "\n==================\n");
-
-        int info[4];
-
-        cpuid(info, 0);
-
-        if (info[0] >= 0x00000001) {
-            cpuid(info, 0x00000001);
-        }
-
-        #ifdef BSLS_PLATFORM_CPU_SSE
-            ASSERT(1  == ((info[3] >> 23) & 0x1));
-        #else
-            ASSERT(0  == ((info[3] >> 23) & 0x1));
-        #endif
-
-        #ifdef BSLS_PLATFORM_CPU_SSE2
-            ASSERT(1 == ((info[3] >> 26) & 0x1));
-        #else
-            ASSERT(0 == ((info[3] >> 26) & 0x1));
-        #endif
-
-        #ifdef BSLS_PLATFORM_CPU_SSE3
-            ASSERT(1 == ((info[2] >>  0) & 0x1));
-        #else
-            ASSERT(0 == ((info[2] >>  0) & 0x1));
-        #endif
-      } break;
       case 4: {
         // --------------------------------------------------------------------
         // TESTING CONCERN: REPORT DEFINITION OF ALL PLATFORM MACROS
